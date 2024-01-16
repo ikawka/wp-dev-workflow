@@ -6,8 +6,7 @@
   - [Mac via brew](https://formulae.brew.sh/formula/docker)
 
 ### Clone Application Repositories
-  - [React App](https://github.com/moving2canada/moving2canada-account)
-  - [Wordpress](https://github.com/moving2canada/wordpress-site)
+  - Clone Applications into the apps folder
 
   ```
   Note: Make sure to clone repos inside the `apps` folder.
