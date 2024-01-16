@@ -1,0 +1,105 @@
+version: '3'
+
+services:
+  wp:
+    privileged: true
+    build: .
+    depends_on:
+      - db
+    container_name: wp
+    environment:
+      - WORDPRESS_DB_HOST=db:3306
+      - WORDPRESS_DB_USER=wpuser
+      - WORDPRESS_DB_PASSWORD=wppassword
+      - WORDPRESS_DB_NAME=wordpress
+      - WORDPRESS_DEBUG=false
+    volumes:
+      - wordpress:/var/www/html
+      - ./apps/wordpress-site/wp-content/plugins:/var/www/html/wp-content/plugins
+      - ./apps/wordpress-site/wp-content/mu-plugins:/var/www/html/wp-content/mu-plugins
+      - ./apps/wordpress-site/wp-content/themes:/var/www/html/wp-content/themes
+    networks:
+      - app-network
+  account:
+    privileged: true
+    image: node:16.13.2
+    container_name: account
+    environment:
+      - NODE_ENV=development
+      - WDS_SOCKET_PORT=3301 
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true 
+    volumes:
+      - ./apps/moving2canada-account:/usr/src/node
+    networks:
+      - app-network
+    working_dir: /usr/src/node
+    stdin_open: true
+    tty: true
+    command: /bin/bash -c "npm install && npm run start"
+  immigquiz:
+    privileged: true
+    image: node:16.13.2
+    container_name: immigquiz
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./apps/strategyform:/usr/src/node
+    networks:
+      - app-network
+    working_dir: /usr/src/node
+    stdin_open: true
+    tty: true
+    command: /bin/bash -c "npm install && npm run start"
+  crscalc:
+    privileged: true
+    image: node:16.13.2
+    container_name: crscalc
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./apps/crscalculator:/usr/src/node
+    networks:
+      - app-network
+    working_dir: /usr/src/node
+    stdin_open: true
+    tty: true
+    command: /bin/bash -c "npm install && npm run start"
+  db:
+    image: mysql:8.0
+    container_name: db
+    environment:
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_ROOT_PASSWORD=developroot
+      - MYSQL_USER=wpuser
+      - MYSQL_PASSWORD=wppassword
+    volumes:
+      - dbdata:/var/lib/mysql 
+    command: '--default-authentication-plugin=mysql_native_password'
+    networks:
+      - app-network
+    ports:
+      - "3306:3306"
+  nginx:
+    depends_on:
+      - wp
+    image: nginx:1.25.2-alpine
+    container_name: nginx
+    hostname: moving2canada.local
+    ports:
+      - "80:80"
+      - "3301:3301"
+    volumes:
+      - ./development/nginx-conf:/etc/nginx/conf.d
+      - wordpress:/var/www/html
+      - ./apps/wordpress-site/wp-content/plugins:/var/www/html/wp-content/plugins
+      - ./apps/wordpress-site/wp-content/mu-plugins:/var/www/html/wp-content/mu-plugins
+      - ./apps/wordpress-site/wp-content/themes:/var/www/html/wp-content/themes
+    networks:
+      - app-network
+volumes:
+  wordpress:
+  dbdata:
+networks:
+  app-network:
+    driver: bridge
