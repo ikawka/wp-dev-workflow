@@ -169,7 +169,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROT
 }
 
 define( 'WP_ENVIRONMENT_TYPE', 'development' );
-
+define( 'WP_AUTO_UPDATE_CORE', false );
 EOPHP
 			chown "$user:$group" wp-config.php
 		elif [ -e wp-config.php ] && [ -n "$WORDPRESS_CONFIG_EXTRA" ] && [[ "$(< wp-config.php)" != *"$WORDPRESS_CONFIG_EXTRA"* ]]; then
